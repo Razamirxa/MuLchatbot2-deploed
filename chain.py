@@ -41,7 +41,7 @@ vectorstore = QdrantVectorStore(
 )
 
 llm = ChatOpenAI(model="gpt-4.1-nano", temperature=0)
-retriever = vectorstore.as_retriever(search_kwargs={"k": 15})
+retriever = vectorstore.as_retriever(search_kwargs={"k": 8})
 
 # Condense chat history and follow-up questions
 CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(
