@@ -5,7 +5,7 @@ from langchain.prompts import (
     HumanMessagePromptTemplate,
     MessagesPlaceholder,
 )
-from more_itertools import chunked
+# from more_itertools import chunked
 
 # Page configuration
 st.set_page_config(
