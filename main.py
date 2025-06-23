@@ -124,7 +124,7 @@ prompt = ChatPromptTemplate(
     ]
 )
 
-msgs = StreamlitChatMessageHistory(key="langchain_messages")
+# msgs = StreamlitChatMessageHistory(key="langchain_messages")
 
 # Main Content
 
