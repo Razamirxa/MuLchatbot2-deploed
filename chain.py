@@ -35,12 +35,13 @@ embeddings = HuggingFaceEmbeddings(
 
 vectorstore = QdrantVectorStore(
     client=client,
-    collection_name="MUL_data_enhanced",
+    collection_name="university_chatbot_hybrid",
     embedding=embeddings,
+    vector_name="dense",
 )
 
 llm = ChatOpenAI(model="gpt-4.1-nano", temperature=0)
-retriever = vectorstore.as_retriever(search_kwargs={"k": 20})
+retriever = vectorstore.as_retriever(search_kwargs={"k": 15})
 
 # Condense chat history and follow-up questions
 CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(
