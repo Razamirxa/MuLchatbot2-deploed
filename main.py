@@ -1,4 +1,4 @@
-from langchain_community.chat_message_histories import StreamlitChatMessageHistory
+# from langchain_community.chat_message_histories import StreamlitChatMessageHistory
 import streamlit as st
 from langchain.prompts import (
     ChatPromptTemplate,
