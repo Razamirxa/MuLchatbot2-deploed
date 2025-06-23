@@ -1,11 +1,10 @@
-# from langchain_community.chat_message_histories import StreamlitChatMessageHistory
 import streamlit as st
-from langchain.prompts import (
+from langchain_core.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
     MessagesPlaceholder,
 )
-# from more_itertools import chunked
+from langchain_core.messages import HumanMessage, AIMessage
 
 # Page configuration
 st.set_page_config(
@@ -95,10 +94,9 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Sidebar for system status and additional features (from original code)
+# Sidebar for system status and additional features
 with st.sidebar:
     # Logo and title
-    
     st.image("https://www.mul.edu.pk/images/logo-mul-footer.png")
     
     st.markdown("---")
@@ -111,7 +109,7 @@ with st.sidebar:
     
     st.markdown("---")
     if st.button("🗑️ Clear Chat History"):
-        st.session_state.langchain_messages = []
+        st.session_state.messages = []
         st.rerun()
 
 # Import your chain
@@ -124,15 +122,16 @@ prompt = ChatPromptTemplate(
     ]
 )
 
-# msgs = StreamlitChatMessageHistory(key="langchain_messages")
+# Initialize session state for messages
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
 # Main Content
+if len(st.session_state.messages) == 0:
+    st.session_state.messages.append({"role": "assistant", "content": "Assalam o Alaikum! How can I assist you today?"})
 
-if len(msgs.messages) == 0:
-    msgs.add_ai_message("Assalam o Alaikum! How can I assist you today?")
-
-for msg in msgs.messages:
-    st.chat_message(msg.type).write(msg.content)
+for message in st.session_state.messages:
+    st.chat_message(message["role"]).write(message["content"])
 
 if prompt := st.chat_input("Ask me anything about MUL University..."):
     st.chat_message("human").write(prompt)
@@ -142,24 +141,31 @@ if prompt := st.chat_input("Ask me anything about MUL University..."):
         full_response = ""
         
         try:
-            _chat_history = st.session_state.langchain_messages[1:40]
-            _chat_history_tranform = list(
-                chunked([msg.content for msg in _chat_history], n=2)
-            )
+            # Prepare chat history for the chain
+            chat_history = []
+            for i in range(0, len(st.session_state.messages) - 1, 2):
+                if i + 1 < len(st.session_state.messages):
+                    human_msg = st.session_state.messages[i]["content"]
+                    ai_msg = st.session_state.messages[i + 1]["content"]
+                    chat_history.append((human_msg, ai_msg))
+            
+            # Limit chat history to last 20 exchanges
+            chat_history = chat_history[-20:]
             
             response = chain.stream(
-                {"question": prompt, "chat_history": _chat_history_tranform}
+                {"question": prompt, "chat_history": chat_history}
             )
             
             for res in response:
                 full_response += res or ""
-                message_placeholder.markdown(full_response + "▋")  # Changed cursor to match original
+                message_placeholder.markdown(full_response + "▋")
             
             # Final response without cursor
             message_placeholder.markdown(full_response)
             
-            msgs.add_user_message(prompt)
-            msgs.add_ai_message(full_response)
+            # Add messages to session state
+            st.session_state.messages.append({"role": "human", "content": prompt})
+            st.session_state.messages.append({"role": "assistant", "content": full_response})
             
         except Exception as e:
             st.error(f"An error occurred: {e}")
