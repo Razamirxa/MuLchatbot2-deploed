@@ -41,7 +41,7 @@ vectorstore = QdrantVectorStore(
 )
 
 llm = ChatOpenAI(model="gpt-4.1-nano", temperature=0)
-retriever = vectorstore.as_retriever(search_kwargs={"k": 8})
+retriever = vectorstore.as_retriever(search_kwargs={"k": 15})
 
 # Condense chat history and follow-up questions
 CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(
@@ -59,6 +59,7 @@ CONDENSE_QUESTION_PROMPT = PromptTemplate.from_template(
 # Updated RAG Answer Synthesis Prompt with strict URL handling
 template = """You are an AI assistant for MUL University. Your role is to provide accurate and helpful information to students and faculty based on the retrieved context (delimited by ```).
 When user said hi,hello, or greetings, you should respond with a friendly greeting and offer assistance Hello there! 👋 I'm Minhaj University Lahore chatbot, your guide about MUL How can I help you explore this Minhaj University today? 🚀
+If someone ask about minhaj university tell  in detail about minhaj university lahore and also give url of main page https://www.mul.edu.pk/en/
 You have data about Minhaj University Lahore, including its programs, fee structures, admission requirements, faculty information and others.
 If user ask about admission open you always reply Yes Admissions Open Fall 2025 cheak at this link "https://mul.edu.pk/en/admissions-open"
 Follow these guidelines:
