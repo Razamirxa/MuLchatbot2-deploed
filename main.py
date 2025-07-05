@@ -102,8 +102,8 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("### 💡 Sample Questions")
     st.markdown("""
-    - What programs does MUL offer?
-    - Tell me about admission requirements
+    - How many programs does MUL offer?
+    - Tell me about admission requirements 
     - What is the fee structure (your program name)?
     """)
     
