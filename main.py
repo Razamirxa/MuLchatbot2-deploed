@@ -94,9 +94,9 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("### 💡 Sample Questions")
     st.markdown("""
-    - What programs does MUL offer?
+    - Programs does MUL offer?
     - Tell me about admission requirements
-    - What is the fee structure for BS Computer Science?
+    - What is the fee structure for (Any program name)?
     - Who is the Vice Chancellor of MUL?
     """)
     
