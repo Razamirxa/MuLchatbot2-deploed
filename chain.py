@@ -24,14 +24,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Your Qdrant credentials
-QDRANT_URL = "https://81208b82-8a02-48aa-8307-9bc52fb64d03.europe-west3-0.gcp.cloud.qdrant.io:6333"
-QDRANT_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIn0.WJhw7tjM7aTuGeE68KOsCVvYVk_8O7E7CVsxkOjTC1s"
+
+QDRANT_URL = os.getenv("QDRANT_URL")
+QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 COLLECTION_NAME = "mul-data-with-pdf-3"
 
 # Initialize components
-embeddings = OpenAIEmbeddings(api_key="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")
-llm = ChatOpenAI(model="gpt-4.1-nano", api_key="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", temperature=0)
-
+# Initialize components
+embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
+llm = ChatOpenAI(model="gpt-4.1-nano", api_key=OPENAI_API_KEY, temperature=0)
 # Initialize Qdrant client and vector store
 client = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
 vector_store = Qdrant(
