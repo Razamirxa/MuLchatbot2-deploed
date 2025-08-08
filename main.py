@@ -1,10 +1,12 @@
 import streamlit as st
-from langchain_core.prompts import (
-    ChatPromptTemplate,
-    HumanMessagePromptTemplate,
-    MessagesPlaceholder,
-)
-from langchain_core.messages import HumanMessage, AIMessage
+from langchain_community.chat_message_histories import StreamlitChatMessageHistory
+from more_itertools import chunked
+from langchain.prompts import MessagesPlaceholder, HumanMessagePromptTemplate, ChatPromptTemplate
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Page configuration
 st.set_page_config(
@@ -14,7 +16,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for better styling (from original code)
+# Custom CSS for better styling
 st.markdown("""
 <style>
     .main-header {
@@ -28,9 +30,6 @@ st.markdown("""
     .stSidebar {
         background-color: #1e1e1e !important;
         color: #ffffff;
-    }
-    .stChatMessage {
-        background-color: ##2d2d2d !important;
     }
     .chat-message {
         padding: 1rem;
@@ -65,13 +64,6 @@ st.markdown("""
         font-weight: bold;
     }
     
-    /* Additional styling for better appearance */
-    .stChatMessage {
-        background-color: transparent !important;
-    }
-    
-
-    
     /* User message styling */
     .stChatMessage[data-testid="user-message"] > div {
         background-color: #e3f2fd;
@@ -86,7 +78,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Header (from original code)
+# Header
 st.markdown("""
 <div class="main-header">
     <h1>🎓 Minhaj University Assistant</h1>
@@ -102,14 +94,15 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("### 💡 Sample Questions")
     st.markdown("""
-    - How many programs does MUL offer?
-    - Tell me about admission requirements 
-    - What is the fee structure (your program name)?
+    - What programs does MUL offer?
+    - Tell me about admission requirements
+    - What is the fee structure for BS Computer Science?
+    - Who is the Vice Chancellor of MUL?
     """)
     
     st.markdown("---")
     if st.button("🗑️ Clear Chat History"):
-        st.session_state.messages = []
+        st.session_state.langchain_messages = []
         st.rerun()
 
 # Import your chain
@@ -122,16 +115,14 @@ prompt = ChatPromptTemplate(
     ]
 )
 
-# Initialize session state for messages
-if "messages" not in st.session_state:
-    st.session_state.messages = []
+msgs = StreamlitChatMessageHistory(key="langchain_messages")
 
 # Main Content
-if len(st.session_state.messages) == 0:
-    st.session_state.messages.append({"role": "assistant", "content": "Assalam o Alaikum! How can I assist you today?"})
+if len(msgs.messages) == 0:
+    msgs.add_ai_message("Assalam o Alaikum! How can I assist you today?")
 
-for message in st.session_state.messages:
-    st.chat_message(message["role"]).write(message["content"])
+for msg in msgs.messages:
+    st.chat_message(msg.type).write(msg.content)
 
 if prompt := st.chat_input("Ask me anything about MUL University..."):
     st.chat_message("human").write(prompt)
@@ -141,19 +132,13 @@ if prompt := st.chat_input("Ask me anything about MUL University..."):
         full_response = ""
         
         try:
-            # Prepare chat history for the chain
-            chat_history = []
-            for i in range(0, len(st.session_state.messages) - 1, 2):
-                if i + 1 < len(st.session_state.messages):
-                    human_msg = st.session_state.messages[i]["content"]
-                    ai_msg = st.session_state.messages[i + 1]["content"]
-                    chat_history.append((human_msg, ai_msg))
-            
-            # Limit chat history to last 20 exchanges
-            chat_history = chat_history[-20:]
+            _chat_history = st.session_state.langchain_messages[1:40]
+            _chat_history_tranform = list(
+                chunked([msg.content for msg in _chat_history], n=2)
+            )
             
             response = chain.stream(
-                {"question": prompt, "chat_history": chat_history}
+                {"question": prompt, "chat_history": _chat_history_tranform}
             )
             
             for res in response:
@@ -163,9 +148,8 @@ if prompt := st.chat_input("Ask me anything about MUL University..."):
             # Final response without cursor
             message_placeholder.markdown(full_response)
             
-            # Add messages to session state
-            st.session_state.messages.append({"role": "human", "content": prompt})
-            st.session_state.messages.append({"role": "assistant", "content": full_response})
+            msgs.add_user_message(prompt)
+            msgs.add_ai_message(full_response)
             
         except Exception as e:
             st.error(f"An error occurred: {e}")
