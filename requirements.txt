@@ -13,3 +13,4 @@ transformers>=4.39.0
 torch>=2.0.0
 numpy>=1.24.0
 langchain_community
+more_itertools
