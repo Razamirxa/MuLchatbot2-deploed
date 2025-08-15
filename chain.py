@@ -4,6 +4,8 @@ from langchain.vectorstores import Qdrant
 from langchain_core.runnables import RunnablePassthrough, RunnableParallel
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from qdrant_client import QdrantClient
+from langchain_qdrant import QdrantVectorStore
 from langchain.schema import Document
 from qdrant_client import QdrantClient
 from typing import List, Dict, Any, Set, Tuple
@@ -36,7 +38,7 @@ embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
 llm = ChatOpenAI(model="gpt-4.1-nano", api_key=OPENAI_API_KEY, temperature=0)
 # Initialize Qdrant client and vector store
 client = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
-vector_store = Qdrant(
+vector_store = QdrantVectorStore(
     client=client,
     collection_name=COLLECTION_NAME,
     embeddings=embeddings
