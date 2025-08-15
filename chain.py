@@ -41,7 +41,7 @@ client = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
 vector_store = QdrantVectorStore(
     client=client,
     collection_name=COLLECTION_NAME,
-    embeddings=embeddings
+    embedding=embeddings
 )
 
 # Create a base retriever with higher k value
