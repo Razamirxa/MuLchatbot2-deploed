@@ -1,7 +1,15 @@
-from langchain.retrievers.multi_query import MultiQueryRetriever
+# from langchain.retrievers.multi_query import MultiQueryRetriever
+# from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+# from langchain.vectorstores import Qdrant
+# from langchain_core.runnables import RunnablePassthrough, RunnableParallel
+
+
+from langchain.retrievers import MultiQueryRetriever
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-from langchain.vectorstores import Qdrant
+from langchain_qdrant import QdrantVectorStore
 from langchain_core.runnables import RunnablePassthrough, RunnableParallel
+
+
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from qdrant_client import QdrantClient
