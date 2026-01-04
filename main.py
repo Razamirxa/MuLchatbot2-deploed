@@ -1,7 +1,6 @@
 import streamlit as st
 from langchain_community.chat_message_histories import StreamlitChatMessageHistory
 from more_itertools import chunked
-# from langchain.prompts import MessagesPlaceholder, HumanMessagePromptTemplate, ChatPromptTemplate
 from langchain_core.prompts import MessagesPlaceholder, HumanMessagePromptTemplate, ChatPromptTemplate
 import os
 from dotenv import load_dotenv
@@ -125,8 +124,8 @@ if len(msgs.messages) == 0:
 for msg in msgs.messages:
     st.chat_message(msg.type).write(msg.content)
 
-if prompt := st.chat_input("Ask me anything about MUL University..."):
-    st.chat_message("human").write(prompt)
+if user_input := st.chat_input("Ask me anything about MUL University..."):
+    st.chat_message("human").write(user_input)
     
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
@@ -139,7 +138,7 @@ if prompt := st.chat_input("Ask me anything about MUL University..."):
             )
             
             response = chain.stream(
-                {"question": prompt, "chat_history": _chat_history_tranform}
+                {"question": user_input, "chat_history": _chat_history_tranform}
             )
             
             for res in response:
@@ -149,7 +148,7 @@ if prompt := st.chat_input("Ask me anything about MUL University..."):
             # Final response without cursor
             message_placeholder.markdown(full_response)
             
-            msgs.add_user_message(prompt)
+            msgs.add_user_message(user_input)
             msgs.add_ai_message(full_response)
             
         except Exception as e:
