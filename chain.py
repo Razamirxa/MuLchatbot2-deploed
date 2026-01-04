@@ -4,7 +4,7 @@
 # from langchain_core.runnables import RunnablePassthrough, RunnableParallel
 
 
-from langchain.retrievers import MultiQueryRetriever
+from langchain_classic.retrievers.multi_query import MultiQueryRetriever
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_qdrant import QdrantVectorStore
 from langchain_core.runnables import RunnablePassthrough, RunnableParallel
