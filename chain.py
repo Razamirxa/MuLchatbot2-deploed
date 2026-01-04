@@ -1,20 +1,10 @@
-# from langchain.retrievers.multi_query import MultiQueryRetriever
-# from langchain_openai import OpenAIEmbeddings, ChatOpenAI
-# from langchain.vectorstores import Qdrant
-# from langchain_core.runnables import RunnablePassthrough, RunnableParallel
-
-
 from langchain_classic.retrievers.multi_query import MultiQueryRetriever
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_qdrant import QdrantVectorStore
 from langchain_core.runnables import RunnablePassthrough, RunnableParallel
-
-
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from qdrant_client import QdrantClient
-from langchain_qdrant import QdrantVectorStore
-# from langchain.schema import Document
 from langchain_core.documents import Document
 from typing import List, Dict, Any, Set, Tuple
 from operator import itemgetter
@@ -34,16 +24,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Your Qdrant credentials
-
 QDRANT_URL = os.getenv("QDRANT_URL")
 QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 COLLECTION_NAME = "mul-data-with-pdf-3"
 
 # Initialize components
-# Initialize components
 embeddings = OpenAIEmbeddings(api_key=OPENAI_API_KEY)
 llm = ChatOpenAI(model="gpt-4.1-nano", api_key=OPENAI_API_KEY, temperature=0)
+
 # Initialize Qdrant client and vector store
 client = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
 vector_store = QdrantVectorStore(
@@ -60,6 +49,7 @@ multi_query_retriever = MultiQueryRetriever.from_llm(
     retriever=base_retriever,
     llm=llm
 )
+
 
 # Simple keyword mapping for common Urdu queries
 def map_urdu_to_english_keywords(query: str) -> str:
@@ -93,10 +83,12 @@ def map_urdu_to_english_keywords(query: str) -> str:
     
     return query_lower
 
+
 # Define helper functions
 def format_docs(docs: List[Document]) -> str:
     """Format documents into a single string"""
     return "\n\n".join(doc.page_content for doc in docs)
+
 
 def extract_program_name(query: str) -> str:
     """Extract program name from query"""
@@ -118,6 +110,7 @@ def extract_program_name(query: str) -> str:
             return match.group(1).strip()
     
     return ""
+
 
 def url_relevance_score(url: str, title: str, query: str, program_name: str) -> int:
     """Calculate relevance score for a URL based on query and program name"""
@@ -162,6 +155,7 @@ def url_relevance_score(url: str, title: str, query: str, program_name: str) -> 
             score += 3
     
     return score
+
 
 def extract_and_rank_urls(query: str, docs: List[Document]) -> List[str]:
     """Extract and rank URLs based on relevance to query"""
@@ -214,6 +208,7 @@ def extract_and_rank_urls(query: str, docs: List[Document]) -> List[str]:
     
     return unique_ranked_urls
 
+
 def format_response(answer: str, urls: List[str]) -> str:
     """Format the final response with answer and URLs"""
     # Check if the answer indicates no information was found
@@ -233,6 +228,7 @@ def format_response(answer: str, urls: List[str]) -> str:
         return answer + url_section
     else:
         return answer
+
 
 # Condense chat history and follow-up questions
 CONDENSE_QUESTION_PROMPT = ChatPromptTemplate.from_template(
@@ -284,6 +280,7 @@ ANSWER_PROMPT = ChatPromptTemplate.from_messages(
     ]
 )
 
+
 # Enhanced function to format retrieved documents with accurate URL extraction
 def _combine_documents(docs):
     combined_content = []
@@ -305,7 +302,6 @@ def _combine_documents(docs):
                         all_urls.append(url)
         
         # Also check if URLs are mentioned in the page content itself
-        import re
         url_pattern = r'https?://[^\s<>"\']*mul\.edu\.pk[^\s<>"\']*'
         found_urls = re.findall(url_pattern, doc.page_content)
         all_urls.extend(found_urls)
@@ -344,6 +340,7 @@ def _combine_documents(docs):
     
     return result
 
+
 # Function to format chat history
 def _format_chat_history(chat_history: List[Tuple[str, str]]) -> List:
     if not chat_history:
@@ -354,10 +351,12 @@ def _format_chat_history(chat_history: List[Tuple[str, str]]) -> List:
         buffer.append(AIMessage(content=ai))
     return buffer
 
+
 # User input schema
 class ChatHistory(BaseModel):
     chat_history: List[Tuple[str, str]] = Field(..., extra={"widget": {"type": "chat"}})
     question: str
+
 
 # Runnable to check and handle chat history
 _search_query = RunnableBranch(
@@ -382,6 +381,7 @@ _inputs = RunnableParallel(
     }
 )
 
+
 # Create the improved LCEL chain with URL ranking and keyword mapping
 def create_improved_rag_chain():
     # Create a chain that maps keywords if needed, then retrieves documents and generates response
@@ -392,7 +392,7 @@ def create_improved_rag_chain():
         | RunnableParallel(
             {
                 "question": lambda x: x["mapped_query"],  # Use mapped query for the rest
-                "docs": lambda x: multi_query_retriever.get_relevant_documents(x["mapped_query"]),
+                "docs": lambda x: multi_query_retriever.invoke(x["mapped_query"]),
                 "chat_history": lambda x: _format_chat_history(x["chat_history"]),
             }
         )
@@ -418,6 +418,7 @@ def create_improved_rag_chain():
     )
     
     return rag_chain
+
 
 # Define the final RAG chain
 chain = (
