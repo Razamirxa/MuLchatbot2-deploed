@@ -14,8 +14,8 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from qdrant_client import QdrantClient
 from langchain_qdrant import QdrantVectorStore
-from langchain.schema import Document
-from qdrant_client import QdrantClient
+# from langchain.schema import Document
+from langchain_core.documents import Document
 from typing import List, Dict, Any, Set, Tuple
 from operator import itemgetter
 from pydantic import BaseModel, Field
